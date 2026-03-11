@@ -1,2 +1,1093 @@
-# bofa-flashcards
-flashcards 4 interview
+[boa-flashcards (2).html](https://github.com/user-attachments/files/25898408/boa-flashcards.2.html)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>BofA Flashcards</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,system-ui,sans-serif;background:#FDF8F2;min-height:100vh;color:#1A1A1A;}
+
+/* HEADER */
+.header{padding:1.2rem 1rem 0.8rem;background:#FDF8F2;position:sticky;top:0;z-index:50;border-bottom:1px solid #E8E0D6;}
+.header h1{font-size:1.3rem;font-weight:700;color:#1A1A1A;}
+.header h1 span{color:#C8102E;}
+.header p{font-size:0.7rem;color:#8A8A8A;letter-spacing:0.08em;text-transform:uppercase;margin-top:0.2rem;}
+.stats{display:flex;gap:1rem;margin-top:0.6rem;}
+.stat{font-size:0.7rem;color:#8A8A8A;}.stat b{color:#C8102E;font-size:1rem;}
+
+/* CONTROLS */
+.controls{padding:0.7rem 1rem;display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;}
+.btn{padding:0.3rem 0.8rem;border-radius:2rem;border:1.5px solid #E8E0D6;background:white;font-size:0.75rem;color:#4A4A4A;cursor:pointer;font-family:inherit;}
+.btn.active{background:#C8102E;border-color:#C8102E;color:white;}
+.btn.action{background:#1A1A1A;border-color:#1A1A1A;color:white;}
+.search{width:100%;padding:0.5rem 0.9rem;border:1.5px solid #E8E0D6;border-radius:2rem;font-size:0.85rem;font-family:inherit;outline:none;background:white;}
+
+/* PROGRESS */
+.prog-wrap{padding:0 1rem 0.5rem;}
+.prog-track{height:3px;background:#E8E0D6;border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:#C8102E;border-radius:2px;transition:width 0.3s;}
+.prog-text{font-size:0.65rem;color:#8A8A8A;display:flex;justify-content:space-between;margin-top:0.3rem;}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;padding:0.5rem 1rem 3rem;}
+@media(max-width:480px){.grid{grid-template-columns:1fr;}}
+
+/* FLIP CARD */
+.fc{height:190px;perspective:800px;cursor:pointer;}
+.fc-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);}
+.fc.flipped .fc-inner{transform:rotateY(180deg);}
+.fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:1.2rem;}
+.fc-front{background:white;border:1.5px solid #E8E0D6;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;flex-direction:column;}
+.fc-back{background:#1C1410;border:1.5px solid rgba(200,16,46,0.3);transform:rotateY(180deg);display:flex;flex-direction:column;overflow:hidden;}
+.fc-cat{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;padding:0.18rem 0.55rem;border-radius:2rem;display:inline-block;margin-bottom:0.7rem;width:fit-content;}
+.fc-q{font-size:0.95rem;font-weight:600;line-height:1.4;flex:1;color:#1A1A1A;}
+.fc-hint{font-size:0.62rem;color:#AAAAAA;margin-top:0.6rem;}
+.fc-cat-back{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:#E8384F;margin-bottom:0.5rem;}
+.fc-a{font-size:0.82rem;color:rgba(255,255,255,0.88);line-height:1.6;flex:1;overflow-y:auto;}
+.fc-a ul{padding-left:1rem;}.fc-a li{margin-bottom:0.2rem;}
+.fc-a strong{color:white;}
+.fc-flip-hint{font-size:0.6rem;color:rgba(255,255,255,0.25);margin-top:0.5rem;}
+
+/* CATEGORY COLOURS */
+.c-itsm{background:#FFF0F2;color:#C8102E;}
+.c-appsupport{background:#FFF5E6;color:#C87010;}
+.c-architecture{background:#F0F5FF;color:#1050C8;}
+.c-database{background:#F0FFF4;color:#107840;}
+.c-monitoring{background:#F5F0FF;color:#6010C8;}
+.c-risk{background:#FFF0F0;color:#A01010;}
+.c-fintech{background:#F0FCFF;color:#107098;}
+.c-bofa{background:#FFF8F0;color:#986010;}
+.c-security{background:#F2F0FF;color:#5030A8;}
+.c-automation{background:#F0FFF8;color:#107060;}
+.c-cloud{background:#EFF8FF;color:#0870B0;}
+.c-compliance{background:#FFF3F0;color:#B04010;}
+.c-troubleshoot{background:#F5F5F5;color:#404040;}
+.c-jobrole{background:#FFF0F8;color:#A0107A;}
+.c-wholesale{background:#F0F8FF;color:#105090;}
+.c-apprenticeship{background:#F8FFF0;color:#407010;}
+.c-innovation{background:#FFF8E8;color:#906000;}
+.c-prep{background:#F0FFF8;color:#107060;}
+
+/* STUDY OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(10,6,4,0.92);z-index:200;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;}
+.overlay.show{display:flex;}
+.s-counter{font-size:0.7rem;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;}
+.s-card{width:100%;max-width:560px;height:300px;perspective:800px;cursor:pointer;}
+.s-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);}
+.s-card.flipped .s-inner{transform:rotateY(180deg);}
+.s-front,.s-back{position:absolute;inset:0;border-radius:16px;padding:2rem;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center;}
+.s-front{background:white;}
+.s-back{background:#1C1410;border:1px solid rgba(200,16,46,0.3);transform:rotateY(180deg);overflow-y:auto;}
+.s-cat{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:#C8102E;margin-bottom:0.8rem;}
+.s-q{font-size:1.2rem;font-weight:700;line-height:1.4;color:#1A1A1A;}
+.s-tap{font-size:0.65rem;color:#AAAAAA;margin-top:1rem;text-transform:uppercase;letter-spacing:0.08em;}
+.s-a{font-size:0.9rem;color:rgba(255,255,255,0.88);line-height:1.7;}
+.s-a ul{padding-left:1.1rem;}.s-a li{margin-bottom:0.3rem;}
+.s-a strong{color:white;}
+.s-nav{display:flex;gap:0.6rem;margin-top:1.2rem;flex-wrap:wrap;justify-content:center;}
+.s-btn{padding:0.55rem 1.3rem;border-radius:2rem;border:none;font-size:0.82rem;cursor:pointer;font-family:inherit;font-weight:500;}
+.s-prev{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2)!important;}
+.s-next{background:#C8102E;color:white;}
+.s-close{background:transparent;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.15)!important;}
+.s-shuf{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.12)!important;}
+.s-prev:active,.s-shuf:active{background:rgba(255,255,255,0.2);}
+.s-next:active{background:#9B0E24;}
+
+.no-cards{grid-column:1/-1;text-align:center;padding:4rem;color:#8A8A8A;font-style:italic;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>BofA Tech <span>Flashcards</span></h1>
+  <p>Global Technology Apprenticeship</p>
+  <div class="stats">
+    <div class="stat"><b id="tc">0</b> total</div>
+    <div class="stat"><b id="vc">0</b> showing</div>
+    <div class="stat"><b id="rc">0</b> reviewed</div>
+  </div>
+</div>
+
+<div class="controls">
+  <input type="text" class="search" id="search" placeholder="Search cards..." oninput="onSearch()">
+  <div id="filters"></div>
+  <button class="btn action" onclick="openStudy()">&#128218; Study Mode</button>
+  <button class="btn action" onclick="doShuffle()">&#128256; Shuffle</button>
+  <button class="btn action" onclick="doReset()">&#8635; Reset</button>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-track"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+  <div class="prog-text"><span id="pt-l">0 reviewed</span><span id="pt-r">0%</span></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="overlay" id="overlay">
+  <div class="s-counter" id="sc-counter">Card 1 of 1</div>
+  <div class="s-card" id="sc" onclick="flipStudy()">
+    <div class="s-inner">
+      <div class="s-front">
+        <div class="s-cat" id="sc-cat"></div>
+        <div class="s-q" id="sc-q"></div>
+        <div class="s-tap">Tap to reveal answer</div>
+      </div>
+      <div class="s-back">
+        <div class="s-a" id="sc-a"></div>
+      </div>
+    </div>
+  </div>
+  <div class="s-nav">
+    <button class="s-btn s-prev" onclick="sNav(-1)">&#8592; Prev</button>
+    <button class="s-btn s-shuf" onclick="sShuf()">&#128256;</button>
+    <button class="s-btn s-next" onclick="sNav(1)">Next &#8594;</button>
+    <button class="s-btn s-close" onclick="closeStudy()">&#10005; Close</button>
+  </div>
+</div>
+
+<script>
+const CARDS = [
+  // ─── ITSM ───────────────────────────────────────────────────────
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What is IT Service Management (ITSM) and why does it matter in banking?",
+    a: "ITSM is the structured way organisations manage technology services to keep systems reliable and handle problems efficiently. In banking, it's critical because failures can disrupt trading, payments, and financial markets. The most widely used ITSM framework is <strong>ITIL</strong>."
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What are the four main purposes of ITSM?",
+    a: "<ul><li>Maintain system reliability</li><li>Manage incidents efficiently</li><li>Control system changes</li><li>Reduce operational risk</li></ul>"
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What is an IT incident and what is the goal of Incident Management?",
+    a: "An <strong>incident</strong> is any unexpected disruption to an IT service (e.g., website crash, database offline, login failure). The goal of Incident Management is to <strong>restore normal service as quickly as possible</strong>."
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "List the 7 stages of the Incident Lifecycle.",
+    a: "<ul><li>1. <strong>Detection</strong> – monitoring or user reports</li><li>2. <strong>Logging</strong> – recorded in ticket system</li><li>3. <strong>Categorisation</strong> – network, DB, application, etc.</li><li>4. <strong>Prioritisation</strong> – P1/P2/P3/P4</li><li>5. <strong>Investigation</strong> – logs, metrics, errors</li><li>6. <strong>Resolution</strong> – fix applied</li><li>7. <strong>Closure</strong> – documented and closed</li></ul>"
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What do the incident priority levels P1–P4 mean?",
+    a: "<ul><li><strong>P1</strong> – Critical system failure</li><li><strong>P2</strong> – Major system disruption</li><li><strong>P3</strong> – Moderate issue</li><li><strong>P4</strong> – Minor issue</li></ul>"
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What is Problem Management and how does it differ from Incident Management?",
+    a: "<strong>Incident Management</strong> = restore service fast. <strong>Problem Management</strong> = find the root cause to prevent recurrence. Example: Incident = payment system down. Problem = database overload caused it. Problem Management investigates <em>why</em> it happened."
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What is Root Cause Analysis (RCA)? Give an example chain.",
+    a: "RCA investigates why an issue occurred and how to prevent it recurring. Example chain: System crash → server memory exhausted → memory leak in application → <strong>software bug</strong> (root cause). The aim is to fix the root cause, not just the symptom."
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What is Change Management and why is it important?",
+    a: "Change Management controls how system updates are made safely. Most outages occur because of poorly managed changes. All changes go through: RFC submitted → risk assessment → technical review → approval → implementation → post-change validation."
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What are the three types of changes in ITSM?",
+    a: "<ul><li><strong>Standard change</strong> – low risk, pre-approved</li><li><strong>Normal change</strong> – requires review and approval</li><li><strong>Emergency change</strong> – urgent fix for critical incidents</li></ul>"
+  },
+  {
+    cat: "itsm",
+    catLabel: "ITSM",
+    q: "What is Capacity Management?",
+    a: "Ensuring systems have enough resources (CPU, memory, storage, network bandwidth) to handle demand. Prevents slow systems, crashes under load, and performance bottlenecks. If a new feature increases traffic, infrastructure must scale to support it."
+  },
+
+  // ─── APPLICATION SUPPORT ────────────────────────────────────────
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "What does an Application Support team do?",
+    a: "<ul><li>Monitor system health</li><li>Respond to incidents</li><li>Troubleshoot software issues</li><li>Coordinate with developers</li><li>Maintain application stability</li></ul>They act as the <strong>first technical response team</strong> when issues occur."
+  },
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "Describe the basic Application Support workflow.",
+    a: "Monitoring detects issue → incident ticket created → support engineers investigate → fix applied → system restored."
+  },
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "What are the 7 types of technical issues you may encounter in App Support?",
+    a: "<ul><li><strong>Functional</strong> – features don't behave as expected</li><li><strong>Performance</strong> – slow or unresponsive</li><li><strong>Security</strong> – unauthorised access or fraud</li><li><strong>Data Integrity</strong> – corrupted/missing data</li><li><strong>Infrastructure</strong> – hardware/server/network</li><li><strong>Integration</strong> – API errors, systems not communicating</li><li><strong>Compliance/Governance</strong> – missing audit logs, unapproved changes</li></ul>"
+  },
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "What tools are commonly used in App Support?",
+    a: "<ul><li><strong>Monitoring/Dashboards:</strong> Splunk, Grafana, Power BI, Tableau</li><li><strong>Incident/Change Tracking:</strong> ServiceNow, JIRA, Confluence</li><li><strong>Databases:</strong> SQL (PostgreSQL, Oracle, SQL Server)</li><li><strong>Scripting:</strong> Python, Bash</li><li><strong>Version Control:</strong> Git/GitHub</li></ul>"
+  },
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "Walk through the 9 core problem-solving steps for tech issues.",
+    a: "<ol style='padding-left:1rem'><li>Assess & Prioritise</li><li>Gather Information (logs, alerts)</li><li>Isolate the Issue</li><li>Check Recent Changes</li><li>Verify Data Integrity</li><li>Implement Corrective Actions</li><li>Escalate When Needed</li><li>Document Everything</li><li>Analyse Root Cause</li></ol>"
+  },
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "How would you approach a mobile app crash in support?",
+    a: "Check logs → reproduce issue → test in staging environment → review recent deployments → apply fix → monitor for recurrence."
+  },
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "How would you handle duplicate transactions in a banking system?",
+    a: "Compare databases → check API calls for double-submission → identify the bug → patch → verify data integrity to ensure no records are corrupted."
+  },
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "What should you always consider when fixing a technical issue at a bank?",
+    a: "<ul><li><strong>Compliance impact</strong> – KYC, AML, GDPR</li><li><strong>Data Integrity</strong> – no corruption or loss</li><li><strong>System Stability</strong> – avoid fixes that create new risks</li><li><strong>Documentation</strong> – record every action for governance</li></ul>"
+  },
+
+  // ─── SYSTEM ARCHITECTURE ────────────────────────────────────────
+  {
+    cat: "architecture",
+    catLabel: "Architecture",
+    q: "What are the four basic layers of system architecture?",
+    a: "<ul><li><strong>User Interface (Frontend)</strong> – what users interact with</li><li><strong>Application Layer (Backend)</strong> – processes business logic</li><li><strong>API Layer</strong> – allows systems to communicate</li><li><strong>Database Layer</strong> – stores persistent data</li></ul>"
+  },
+  {
+    cat: "architecture",
+    catLabel: "Architecture",
+    q: "What is a microservices architecture and why is it used in finance?",
+    a: "Breaking a system into small, independent services each handling one function (e.g., payments, auth, fraud detection, notifications). Benefits: <strong>scale easily, isolate failures, update independently</strong>. Used by most modern financial systems."
+  },
+  {
+    cat: "architecture",
+    catLabel: "Architecture",
+    q: "What four qualities does good system architecture improve?",
+    a: "<ul><li>Reliability</li><li>Scalability</li><li>Performance</li><li>Maintainability</li></ul>"
+  },
+  {
+    cat: "architecture",
+    catLabel: "Architecture",
+    q: "What is the FinTech infrastructure stack (6 layers)?",
+    a: "<ol style='padding-left:1rem'><li>Consumers & Businesses</li><li>Financial Products (accounts, cards, mortgages)</li><li>Payment Networks (Visa, Mastercard)</li><li>Banking Infrastructure (SWIFT, Faster Payments, CHAPS)</li><li>FinTech Platforms (Stripe, Adyen APIs)</li><li>Regulation (FCA)</li></ol>"
+  },
+
+  // ─── DATABASES ──────────────────────────────────────────────────
+  {
+    cat: "database",
+    catLabel: "Databases",
+    q: "What is a database and what does a bank store in one?",
+    a: "A system to store and manage structured data. Banks store: <ul><li>Customer information</li><li>Transactions</li><li>Account balances</li><li>Trading data</li></ul>"
+  },
+  {
+    cat: "database",
+    catLabel: "Databases",
+    q: "Define: Table, Record, Primary Key, Query.",
+    a: "<ul><li><strong>Table</strong> – structured data in rows and columns</li><li><strong>Record</strong> – a single row in a table</li><li><strong>Primary Key</strong> – unique identifier for each record</li><li><strong>Query</strong> – a request for data (e.g., <code>SELECT * FROM customers</code>)</li></ul>"
+  },
+  {
+    cat: "database",
+    catLabel: "Databases",
+    q: "What four properties must banking databases maintain?",
+    a: "<ul><li><strong>Accuracy</strong></li><li><strong>Security</strong></li><li><strong>Performance</strong></li><li><strong>Availability</strong></li></ul>"
+  },
+  {
+    cat: "database",
+    catLabel: "Databases",
+    q: "What is Data Integrity?",
+    a: "Ensuring data is <strong>accurate, consistent, and reliable</strong> over its entire lifecycle. Critical in banking to prevent duplicate transactions, mismatched balances, or corrupted records."
+  },
+
+  // ─── MONITORING ─────────────────────────────────────────────────
+  {
+    cat: "monitoring",
+    catLabel: "Monitoring",
+    q: "What is monitoring and what are systems monitored for?",
+    a: "Continuous tracking of system performance and health. Monitored metrics include: <ul><li>CPU usage</li><li>Memory consumption</li><li>Response times</li><li>Error rates</li><li>Network activity</li></ul>Alerts are generated when thresholds are exceeded."
+  },
+  {
+    cat: "monitoring",
+    catLabel: "Monitoring",
+    q: "What is observability and how does it differ from monitoring?",
+    a: "<strong>Monitoring</strong> tracks predefined metrics and alerts. <strong>Observability</strong> goes deeper — analysing <strong>logs, metrics, and distributed traces</strong> to diagnose complex system issues quickly, especially in microservices architectures."
+  },
+  {
+    cat: "monitoring",
+    catLabel: "Monitoring",
+    q: "Name 4 monitoring/dashboard tools used in industry.",
+    a: "<ul><li><strong>Splunk</strong> – log management and monitoring</li><li><strong>Grafana</strong> – metrics visualisation</li><li><strong>Power BI</strong> – business intelligence dashboards</li><li><strong>Tableau</strong> – data visualisation</li></ul>"
+  },
+
+  // ─── RISK MANAGEMENT ────────────────────────────────────────────
+  {
+    cat: "risk",
+    catLabel: "Risk",
+    q: "What are the 5 main types of risk banks manage?",
+    a: "<ul><li><strong>Credit Risk</strong> – borrowers don't repay loans</li><li><strong>Market Risk</strong> – loss from price/rate/currency changes</li><li><strong>Operational Risk</strong> – system failures, fraud, human error</li><li><strong>Liquidity Risk</strong> – can't meet short-term obligations</li><li><strong>Compliance/Regulatory Risk</strong> – breaking laws (AML, GDPR)</li></ul>"
+  },
+  {
+    cat: "risk",
+    catLabel: "Risk",
+    q: "How is credit risk mitigated?",
+    a: "Credit scoring, collateral requirements, lending limits, and diversifying loans across industries to avoid concentration risk."
+  },
+  {
+    cat: "risk",
+    catLabel: "Risk",
+    q: "How is market risk mitigated?",
+    a: "Hedging with derivatives (options, futures), diversifying investments across markets and asset types, and monitoring exposure daily."
+  },
+  {
+    cat: "risk",
+    catLabel: "Risk",
+    q: "How is operational risk mitigated in technology?",
+    a: "Maintain redundant/backup systems, automate repetitive tasks to reduce human error, train staff, enforce procedures, conduct compliance checks, and use secure architecture with failover capabilities."
+  },
+  {
+    cat: "risk",
+    catLabel: "Risk",
+    q: "What are the 5 general principles of risk minimisation?",
+    a: "<ul><li>Identify risks early</li><li>Assess impact and likelihood</li><li>Implement controls</li><li>Monitor continuously</li><li>Respond and adapt (incident response plans)</li></ul>"
+  },
+  {
+    cat: "risk",
+    catLabel: "Risk",
+    q: "Why do technology apprentices need to understand risk management?",
+    a: "You may maintain systems that process sensitive financial data, build compliance dashboards, or ensure outages don't create financial risk. Understanding <em>why</em> policies exist — not just how to code — is essential at a bank."
+  },
+  {
+    cat: "risk",
+    catLabel: "Risk",
+    q: "What is Responsible Growth at Bank of America?",
+    a: "Growing the business sustainably, customer-focused, and with strong risk management. Key pillars: <ul><li>Growth is essential</li><li>Customer-focused strategy</li><li>Every employee owns risk management</li><li>Operational excellence</li><li>Great place to work</li><li>Sharing success with communities</li></ul>"
+  },
+
+  // ─── COMPLIANCE ─────────────────────────────────────────────────
+  {
+    cat: "compliance",
+    catLabel: "Compliance",
+    q: "What is KYC and why does a bank need it?",
+    a: "<strong>Know Your Customer</strong> – the process of verifying a customer's identity before providing services. Required by regulators to prevent fraud, money laundering, and terrorist financing."
+  },
+  {
+    cat: "compliance",
+    catLabel: "Compliance",
+    q: "What is AML and how is it enforced technically?",
+    a: "<strong>Anti-Money Laundering</strong> – detecting and preventing suspicious transactions. Enforced via automated monitoring systems that flag unusual patterns, large cash movements, or transactions to high-risk jurisdictions."
+  },
+  {
+    cat: "compliance",
+    catLabel: "Compliance",
+    q: "What is governance in a technology context?",
+    a: "Frameworks, rules, and oversight to ensure systems are <strong>secure, stable, and compliant</strong>. Ensures all changes are documented, risks are tracked, and actions are auditable. Key frameworks: ITIL, bank-specific governance policies."
+  },
+  {
+    cat: "compliance",
+    catLabel: "Compliance",
+    q: "What compliance considerations apply when fixing a tech issue?",
+    a: "Ensure fixes follow KYC, AML, and GDPR policies. Prevent data corruption. Avoid temporary fixes that create additional risks. Document every action for governance and audit purposes."
+  },
+
+  // ─── SECURITY ───────────────────────────────────────────────────
+  {
+    cat: "security",
+    catLabel: "Security",
+    q: "Explain the difference between Authentication and Authorisation.",
+    a: "<strong>Authentication</strong> = verifying WHO you are (e.g., password, biometric). <strong>Authorisation</strong> = determining WHAT you can access once identity is confirmed. Both are required for secure systems."
+  },
+  {
+    cat: "security",
+    catLabel: "Security",
+    q: "What is encryption and why is it critical in banking?",
+    a: "Encryption transforms data so it cannot be read by unauthorised parties. Critical in banking because systems process highly sensitive financial data — encrypting transactions, stored data, and communications prevents interception and data breaches."
+  },
+  {
+    cat: "security",
+    catLabel: "Security",
+    q: "What is the Principle of Least Privilege?",
+    a: "Only give users the <strong>minimum access they need</strong> to perform their role. Reduces attack surface and limits damage if credentials are compromised. Applied via IAM (Identity and Access Management) systems."
+  },
+  {
+    cat: "security",
+    catLabel: "Security",
+    q: "Name 5 cybersecurity risk mitigation techniques.",
+    a: "<ul><li>Encryption</li><li>Firewalls</li><li>Multi-factor authentication (MFA)</li><li>Regular software patching</li><li>Network monitoring for suspicious activity</li></ul>"
+  },
+
+  // ─── FINTECH CONCEPTS ───────────────────────────────────────────
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "What is the difference between a payment network and a settlement system?",
+    a: "<strong>Payment Network</strong> (Visa, Mastercard) – routes payment requests between banks; authorises or declines transactions. Money does NOT move yet. <strong>Settlement System</strong> – actual money moves between banks, sometimes hours or days later. Separating them makes systems faster, scalable, and secure."
+  },
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "What is an API and why is it essential to FinTech?",
+    a: "An <strong>API (Application Programming Interface)</strong> allows software systems to communicate. In banking (Open Banking), banks expose secure APIs so third parties can build expense trackers, payment processors, and financial dashboards. Without APIs, FinTech would barely exist."
+  },
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "How does modern fraud detection work?",
+    a: "Monitors: unusual spending patterns, location anomalies, abnormal transaction sizes. Uses <strong>machine learning, real-time analytics, and behavioural modelling</strong>. Example: London-based customer gets a payment from Brazil → flagged. Banks process millions of fraud checks per second."
+  },
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "What are real-time payments and why are they significant?",
+    a: "Systems enabling <strong>instant transfers 24/7</strong> using instant clearing and immediate settlement. Example: Faster Payments Service (UK). Historically payments took days. Real-time payments are a major global trend driven by consumer demand for immediacy."
+  },
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "What banking infrastructure systems route global money movements?",
+    a: "<ul><li><strong>SWIFT</strong> – global payment messaging network</li><li><strong>Faster Payments Service</strong> – UK instant transfers</li><li><strong>CHAPS</strong> – UK high-value transfers</li></ul>"
+  },
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "What are FinTech platform companies and what do they provide?",
+    a: "Infrastructure for businesses to integrate payments. Examples: <strong>Stripe, Adyen</strong>. They provide APIs developers use to add payments to apps, abstracting complex banking infrastructure into simple integrations."
+  },
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "How is data analytics used in finance?",
+    a: "<ul><li>Customer behaviour analysis</li><li>Credit risk modelling</li><li>Fraud detection</li><li>Operational monitoring</li></ul>Tools: Tableau, Power BI. Produces dashboards used by executives, engineers, and analysts."
+  },
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "What is the core idea of finance as a technology system?",
+    a: "Finance is essentially a <strong>massive network of data systems moving money and information</strong>. Banks like BofA operate payment networks, transaction processing systems, risk models, and regulatory monitoring platforms — all powered by software."
+  },
+
+  // ─── CLOUD ──────────────────────────────────────────────────────
+  {
+    cat: "cloud",
+    catLabel: "Cloud",
+    q: "What is cloud computing and what are its key benefits for banks?",
+    a: "Running applications on remote infrastructure managed by cloud providers (e.g., AWS, Azure). Benefits: <ul><li>Scalability – scale resources on demand</li><li>High availability</li><li>Reduced infrastructure maintenance</li><li>Global accessibility</li></ul>"
+  },
+  {
+    cat: "cloud",
+    catLabel: "Cloud",
+    q: "What must banks ensure when using cloud infrastructure?",
+    a: "<ul><li><strong>Regulatory compliance</strong> – data residency, audit requirements</li><li><strong>Strong security</strong> – encryption, access controls, monitoring</li></ul>Financial institutions are heavily regulated, so cloud adoption requires careful governance."
+  },
+
+  // ─── AUTOMATION ─────────────────────────────────────────────────
+  {
+    cat: "automation",
+    catLabel: "Automation",
+    q: "What is automation in technology and what are its benefits?",
+    a: "Using technology to perform tasks automatically rather than manually. Benefits: <ul><li>Reduces human error</li><li>Increases efficiency</li><li>Improves reliability</li></ul>Examples: automated monitoring, deployments, reporting, testing."
+  },
+  {
+    cat: "automation",
+    catLabel: "Automation",
+    q: "How does automation help with risk management at banks?",
+    a: "AI/ML detect anomalies in transactions and trading behaviour. Automated monitoring flags suspicious activity for AML/KYC compliance. Automated testing catches bugs before deployment. Automation allows large systems to operate at scale with consistent governance."
+  },
+
+  // ─── BANK OF AMERICA VALUES ──────────────────────────────────────
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What is Bank of America's core mission?",
+    a: "To <strong>help make financial lives better</strong> through the power of every connection — creating value for clients, shareholders, employees, and communities while supporting economic growth."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What are Bank of America's four core values?",
+    a: "<ul><li><strong>Deliver Together</strong> – collaborate, empathy, discipline</li><li><strong>Act Responsibly</strong> – integrity, ethical decision-making</li><li><strong>Realize the Power of Our People</strong> – invest in employees, value diversity</li><li><strong>Trust the Team</strong> – mutual trust, shared responsibility</li></ul>"
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What three customer groups does Bank of America serve?",
+    a: "<ul><li><strong>Individuals (People)</strong></li><li><strong>Companies</strong></li><li><strong>Institutional Investors</strong></li></ul>In the US, BofA serves all three. Outside the US, it primarily focuses on large corporations and institutional investors."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What is Erica® and why is it significant?",
+    a: "Erica is one of the <strong>first widely available AI-driven virtual assistants in banking</strong>, built by Bank of America. It helps customers manage finances, track spending, and receive personalised insights — an example of BofA's 'high-tech and high-touch' approach."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What is the Council on Responsible Use of AI, and who founded it?",
+    a: "A partnership between <strong>Bank of America and Harvard Kennedy School's Belfer Center</strong> (founded 2018). Examines ethical, legal, and policy challenges of AI. Key focus areas: <strong>privacy, rights/justice, transparency, workforce transformation</strong>."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What is 'high-tech and high-touch' banking?",
+    a: "BofA's approach combining <strong>convenient digital services</strong> (Erica, Merrill Edge, mobile banking) with <strong>personalised human support</strong> when needed. Ensures customers get efficiency without losing the human connection for complex needs."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What three areas does BofA focus on for sustainable growth?",
+    a: "<ul><li><strong>Operational Excellence</strong> – continuous improvement, efficiency, reinvestment</li><li><strong>A Great Place to Work</strong> – talent development, inclusion, wellbeing</li><li><strong>Sharing Success with Communities</strong> – philanthropy, sustainable finance, SDGs</li></ul>"
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What does BofA's community impact look like in practice?",
+    a: "Operates in ~100 US markets with market presidents. Supports: affordable housing, hunger initiatives, economic mobility. Example: LA wildfire response — $4.5M philanthropic support, 300+ business specialists, 233,000+ volunteer hours since 2020."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What business sizes does BofA serve and how are they segmented?",
+    a: "<ul><li><strong>Small businesses:</strong> up to $1M revenue</li><li><strong>Mid-size:</strong> $1M–$50M</li><li><strong>Middle-market:</strong> $50M–$2B</li><li><strong>Large corporations:</strong> over $2B</li><li>Institutional investors</li></ul>"
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What is Merrill Guided Investing?",
+    a: "An online advisory platform offering portfolio management strategies guided by BofA's Chief Investment Office. Part of Merrill (BofA's investment arm). Options include self-directed (Merrill Edge) and professionally managed portfolios."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What is Better Money Habits® and what is it for?",
+    a: "A BofA financial education program providing resources to help individuals build strong financial foundations — budgeting, saving, credit-building. Part of BofA's focus on financial health and inclusion."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What innovation accolade does Bank of America hold in banking?",
+    a: "BofA holds <strong>more patents and patent applications than any other bank</strong>, reflecting its leadership in financial technology. It also runs <strong>DevCon</strong>, an internal conference where technologists share innovations."
+  },
+  {
+    cat: "bofa",
+    catLabel: "BofA Values",
+    q: "What is the Academy for Global Technology and Global Operations?",
+    a: "BofA's internal training initiative providing development for <strong>current and future technology roles</strong>. Part of BofA's commitment to employee development and upskilling — directly relevant to apprentices."
+  },
+
+  // ─── TRANSACTION PROCESSING ─────────────────────────────────────
+  {
+    cat: "fintech",
+    catLabel: "FinTech",
+    q: "What do transaction processing systems handle and what are their key requirements?",
+    a: "Handle: payment authorisation, account balance updates, transaction logging. Must be: <strong>extremely fast, highly reliable, and secure</strong>. Banks process <strong>billions of transactions daily</strong>."
+  },
+
+  // ─── TECHNICAL COMMUNICATION ────────────────────────────────────
+  {
+    cat: "appsupport",
+    catLabel: "App Support",
+    q: "Why is clear communication critical in technology teams at a bank?",
+    a: "Tech professionals must communicate with both technical and non-technical colleagues. Clear communication helps organisations resolve issues faster. Instead of 'service dependency failure', say: <strong>'The payment system stopped working because the database server became overloaded.'</strong>"
+  },
+
+  // ─── TROUBLESHOOTING ────────────────────────────────────────────
+  {
+    cat: "troubleshoot",
+    catLabel: "Troubleshooting",
+    q: "How would you approach a payment gateway going down?",
+    a: "Check network/server status → activate failover if available → notify affected users → conduct RCA to identify permanent fix → document actions for governance/audit."
+  },
+  {
+    cat: "troubleshoot",
+    catLabel: "Troubleshooting",
+    q: "How do you handle a suspicious transaction flag?",
+    a: "Review transaction history → verify KYC/AML compliance → escalate to fraud team → monitor the account for further suspicious activity → document all actions."
+  },
+  {
+    cat: "troubleshoot",
+    catLabel: "Troubleshooting",
+    q: "What is the difference between a temporary fix and a permanent solution?",
+    a: "<strong>Temporary fix (workaround)</strong> – restores service quickly but doesn't address root cause. <strong>Permanent solution</strong> – addresses the root cause through automation, monitoring improvements, or code fixes. Both have a role but only RCA prevents recurrence."
+  },
+  {
+    cat: "troubleshoot",
+    catLabel: "Troubleshooting",
+    q: "When should you escalate an incident?",
+    a: "Escalate when: risk is high, the issue exceeds your expertise, you need specialist teams (e.g., fraud, DBA, security), or resolution is taking too long relative to the incident's priority level (P1/P2 need rapid escalation)."
+  },
+
+  // ─── GOVERNANCE ────────────────────────────────────────────────
+  {
+    cat: "compliance",
+    catLabel: "Compliance",
+    q: "What 4 things does BofA's governance structure ensure?",
+    a: "<ul><li>Experienced and independent board of directors</li><li>Skilled management teams</li><li>Clear governance structures</li><li>Responsible decision-making for long-term stability</li></ul>"
+  },
+  {
+    cat: "compliance",
+    catLabel: "Compliance",
+    q: "What best practices does BofA use for governance and risk alignment?",
+    a: "<ul><li>ITSM governance frameworks (incident, problem, change, capacity)</li><li>Periodic process reviews</li><li>Automation to reduce human error</li><li>Risk alignment with regulatory and operational frameworks</li><li>Training and awareness programs</li></ul>"
+  },
+
+  // ─── JOB RESPONSIBILITIES ──────────────────────────────────────
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What is the core purpose of your role in the Application Support team?",
+    a: "Supporting Bank of America's <strong>core wholesale banking and vendor applications</strong>. You will support and mature the governance framework across ITSM processes (Incident, Problem, Change, Capacity) and ensure system stability, compliance, and risk management across application portfolios."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What are your key day-to-day responsibilities in this role?",
+    a: "<ul><li>Support ITSM governance (Incident, Problem, Change, Capacity)</li><li>Coordinate risk and sustainability routines — reviews, actions, reports</li><li>Monitor and report on process performance and compliance</li><li>Conduct periodic process reviews and drive corrective actions</li><li>Prepare dashboards, status updates, and performance metrics for governance meetings</li><li>Maintain governance documentation (templates, trackers, Confluence pages)</li><li>Contribute to automation and reporting initiatives</li></ul>"
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What is a governance framework in the context of this role?",
+    a: "A set of documented processes, controls, and oversight mechanisms that ensure technology systems are managed consistently, compliantly, and with accountability. In this role, you'll <strong>support and mature</strong> the governance framework — meaning keeping it up-to-date, identifying gaps, and improving it over time."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What does 'coordinating risk and sustainability routines' mean in practice?",
+    a: "Ensuring that regular risk reviews happen on schedule, actions are assigned and completed, and reports are produced on time. Example: a weekly check that all known application risks have been reviewed, owners assigned, and nothing has been missed or overdue."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What does 'monitoring process compliance across application portfolios' involve?",
+    a: "Checking that all applications in your portfolio are following required governance processes — e.g., incidents are being logged, changes are going through approval, capacity is being reviewed. Flagging anything that's non-compliant and working with teams to fix it."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What is a governance meeting and how do you support one?",
+    a: "A regular meeting where teams review the health of systems, risks, incidents, and compliance status. You support by preparing: <ul><li>Dashboards showing key metrics</li><li>Status updates on open actions</li><li>Performance reports across applications</li><li>Evidence that processes are being followed</li></ul>"
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What is Confluence and how is it used in your role?",
+    a: "Confluence is a <strong>team collaboration and documentation platform</strong> (by Atlassian, same company as JIRA). In your role, you'll maintain Confluence pages for: process templates, governance trackers, evidence repositories, and meeting notes. It acts as the team's central knowledge base."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What is a governance tracker and what does it contain?",
+    a: "A document or tool (often a spreadsheet or Confluence page) that tracks: open risks and their status, outstanding actions and owners, review dates, compliance checks, and evidence that required processes have been completed. Keeps governance visible and auditable."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What does 'evidence repository' mean in a governance context?",
+    a: "A stored collection of proof that governance activities have been completed correctly — e.g., screenshots of completed reviews, signed-off documents, meeting minutes, approval records. Needed for internal audits and regulatory compliance. In this role you'd maintain and organise these."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What does 'governance alignment with risk, control, and compliance frameworks' mean?",
+    a: "Ensuring the way your team manages applications matches the bank's broader rules and regulations. Example: your Incident Management process must align with BofA's risk control policies and external regulations (e.g., FCA requirements). If they drift apart, you flag and correct it."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What are 'vendor applications' and why do they need support?",
+    a: "Software bought from external companies (vendors) rather than built in-house. Examples: trading platforms, risk systems, data tools. They still need monitoring, incident management, and governance — you liaise with the vendor and internal teams when issues arise."
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What skills does this job posting say are essential for applicants?",
+    a: "<ul><li>Enthusiastic learner with intellectual curiosity</li><li>Ability to solve problems in new ways</li><li>Work effectively both as part of a team and independently</li><li>Communicate clearly with diverse groups of colleagues</li></ul>"
+  },
+  {
+    cat: "jobrole",
+    catLabel: "Your Role",
+    q: "What desired technical knowledge does the job posting mention?",
+    a: "<ul><li>Financial services knowledge</li><li>System design and architecture</li><li>Database systems and business intelligence tools</li><li>Service management within Technology (ITSM/ITIL)</li></ul>These are <em>desired</em>, not required — the programme trains you from scratch."
+  },
+
+  // ─── WHOLESALE BANKING ─────────────────────────────────────────
+  {
+    cat: "wholesale",
+    catLabel: "Wholesale Banking",
+    q: "What is wholesale banking and how does it differ from retail banking?",
+    a: "<strong>Retail banking</strong> = services for individual consumers (current accounts, mortgages, credit cards). <strong>Wholesale banking</strong> = financial services for large clients — corporations, institutions, governments, and other banks. Deals in much larger transaction sizes and more complex financial products."
+  },
+  {
+    cat: "wholesale",
+    catLabel: "Wholesale Banking",
+    q: "What types of clients use wholesale banking services?",
+    a: "<ul><li>Large corporations (over $2B revenue)</li><li>Middle-market companies ($50M–$2B)</li><li>Institutional investors (hedge funds, pension funds)</li><li>Governments and public sector bodies</li><li>Other financial institutions and banks</li></ul>"
+  },
+  {
+    cat: "wholesale",
+    catLabel: "Wholesale Banking",
+    q: "What are the main wholesale banking products and services?",
+    a: "<ul><li><strong>Corporate lending</strong> – large loans to businesses</li><li><strong>Trade finance</strong> – financing international trade</li><li><strong>Cash management</strong> – managing large-scale payments and liquidity</li><li><strong>Investment banking</strong> – mergers, acquisitions, capital raising</li><li><strong>Markets/Trading</strong> – foreign exchange, bonds, derivatives</li><li><strong>Transaction services</strong> – processing high-volume payments</li></ul>"
+  },
+  {
+    cat: "wholesale",
+    catLabel: "Wholesale Banking",
+    q: "Why do wholesale banking applications need specialist support teams?",
+    a: "Wholesale banking systems process <strong>extremely high-value transactions</strong> and operate in real-time markets. Downtime or errors have massive financial consequences. Systems are complex, often mission-critical 24/7, and must comply with strict regulations — making dedicated application support essential."
+  },
+  {
+    cat: "wholesale",
+    catLabel: "Wholesale Banking",
+    q: "What is a trading platform and why does it need application support?",
+    a: "Software used by traders to buy and sell financial instruments (currencies, bonds, stocks, derivatives). If it goes down during market hours, the bank can lose millions per minute. Application support teams monitor these systems constantly and respond to incidents immediately."
+  },
+  {
+    cat: "wholesale",
+    catLabel: "Wholesale Banking",
+    q: "What is cash management in wholesale banking?",
+    a: "Services that help large corporations manage their money flows — collecting payments, making payments, managing account balances across multiple countries, and optimising liquidity. The supporting technology processes huge volumes of transactions and must be highly reliable."
+  },
+  {
+    cat: "wholesale",
+    catLabel: "Wholesale Banking",
+    q: "What is trade finance?",
+    a: "Financial products that support international trade between businesses — e.g., letters of credit, guarantees, invoice financing. Technology systems track trade documents, payments, and compliance checks (e.g., sanctions screening) across borders."
+  },
+
+  // ─── APPRENTICESHIP PROGRAMME ──────────────────────────────────
+  {
+    cat: "apprenticeship",
+    catLabel: "Programme",
+    q: "What degree do you study during this apprenticeship?",
+    a: "<strong>Digital & Technology Solutions Professional Degree</strong>, on the <strong>Technology Consultant pathway</strong>. This is a <strong>Level 6 degree apprenticeship</strong> — you graduate after 3 years with a full bachelor's degree while earning a salary."
+  },
+  {
+    cat: "apprenticeship",
+    catLabel: "Programme",
+    q: "When does the programme start and how long does it last?",
+    a: "Starts <strong>September 2026</strong>. Lasts <strong>3 years</strong>, graduating with a Degree in Digital and Technology Solutions. You work full-time throughout, splitting time between your role and apprenticeship study."
+  },
+  {
+    cat: "apprenticeship",
+    catLabel: "Programme",
+    q: "What parts of the Technology organisation do apprentices work in?",
+    a: "<ul><li>Business analysis</li><li>Data science</li><li>Software engineering</li><li>Infrastructure engineering</li><li>System security</li><li>Technology operations</li></ul>Roles evolve based on career aspirations and skills development."
+  },
+  {
+    cat: "apprenticeship",
+    catLabel: "Programme",
+    q: "What support do apprentices receive throughout the programme?",
+    a: "<ul><li>Extensive formal training at the start</li><li>On-the-job support from experienced colleagues</li><li>Educational speaker events</li><li>Mentorship throughout the 3 years</li><li>Access to employee networks</li><li>Academy for Global Technology and Global Operations training</li></ul>"
+  },
+  {
+    cat: "apprenticeship",
+    catLabel: "Programme",
+    q: "What are the eligibility requirements for this apprenticeship?",
+    a: "<ul><li>At least 3 A-levels/BTEC with minimum 104 UCAS points (BCC)</li><li>Grade C/5 or above in Maths and English GCSE (grade 4 not accepted)</li><li>UK resident for past 3 years</li><li>Right to work in UK indefinitely</li><li>Not in full-time education when starting</li><li>Not previously completed a qualification at the same level covering the same skills</li></ul>"
+  },
+  {
+    cat: "apprenticeship",
+    catLabel: "Programme",
+    q: "Why is being a 'Great Place to Work' core to BofA's strategy?",
+    a: "It's central to <strong>Responsible Growth</strong>. BofA believes attracting and developing exceptional talent, supporting wellbeing, promoting inclusion, and recognising performance are what enable the business to serve clients and communities well. Happy, developed employees = better outcomes for everyone."
+  },
+  {
+    cat: "apprenticeship",
+    catLabel: "Programme",
+    q: "What does the Global Technology team do at BofA?",
+    a: "Designs, develops and supports applications for the bank's full range of products and services in <strong>30+ countries</strong>. Liaises with both technical and business colleagues to deliver high-quality, scalable, and performant systems aligned with the bank's strategic goals."
+  },
+  {
+    cat: "apprenticeship",
+    catLabel: "Programme",
+    q: "How should you think about career progression on this apprenticeship?",
+    a: "BofA says apprentices <strong>evolve during the programme</strong> based on career aspirations and how quickly technical and soft skills develop. They encourage using employee networks and all available resources to accelerate your career. There's no fixed ceiling — progression is merit-based."
+  },
+
+  // ─── BOFA INNOVATION ───────────────────────────────────────────
+  {
+    cat: "innovation",
+    catLabel: "BofA Innovation",
+    q: "What is DevCon at Bank of America?",
+    a: "An <strong>internal technology conference</strong> where BofA's technologists share ideas, innovations, and creative solutions across the organisation. Reflects BofA's culture of internal collaboration and innovation — giving engineers and support staff a platform to showcase their work."
+  },
+  {
+    cat: "innovation",
+    catLabel: "BofA Innovation",
+    q: "What is BofA's position on patents in the banking industry?",
+    a: "Bank of America holds <strong>more patents and patent applications than any other bank</strong>. This reflects its leadership in financial technology — actively protecting and investing in new innovations across digital banking, AI, security, and payments."
+  },
+  {
+    cat: "innovation",
+    catLabel: "BofA Innovation",
+    q: "What are the 4 focus areas of BofA's AI Council (Harvard Kennedy School partnership)?",
+    a: "<ul><li><strong>Privacy</strong> – ensuring ML and large-scale data use don't compromise personal privacy</li><li><strong>Rights, justice, and equality</strong> – preventing algorithms from reinforcing inequality</li><li><strong>Transparency</strong> – building trustworthy, explainable AI systems</li><li><strong>Workforce transformation</strong> – reskilling and upskilling for AI-driven change</li></ul>"
+  },
+  {
+    cat: "innovation",
+    catLabel: "BofA Innovation",
+    q: "Why does BofA say AI carries risks if not used responsibly?",
+    a: "AI systems can: embed biases from training data, make opaque decisions that can't be explained, compromise privacy through large-scale data use, and displace workers without support. That's why BofA partnered with Harvard to examine ethical, legal, and policy challenges before deploying AI at scale."
+  },
+  {
+    cat: "innovation",
+    catLabel: "BofA Innovation",
+    q: "What is Merrill Edge and who is it for?",
+    a: "BofA's <strong>self-directed investing platform</strong> — for customers who want to manage their own investments online without a financial advisor. Part of Merrill (BofA's investment arm). Sits alongside Merrill Guided Investing (professionally managed) and Private Bank (ultra-high-net-worth)."
+  },
+  {
+    cat: "innovation",
+    catLabel: "BofA Innovation",
+    q: "What does 'responsible use of AI' mean at BofA specifically?",
+    a: "Using AI to improve efficiency, customer experience, and risk management — while ensuring it is <strong>fair, transparent, privacy-preserving, and doesn't reinforce inequality</strong>. BofA uses AI in fraud detection, customer service (Erica), risk modelling, and operations, always within an ethical governance framework."
+  },
+
+  // ─── PREP: THINGS TO KNOW BEFORE STARTING ──────────────────────
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "How would you explain why you want to work in technology at a bank specifically?",
+    a: "Banks are some of the most complex technology environments in the world — processing billions of transactions, managing global risk in real time. Working at BofA means your technology work has direct impact on millions of clients and communities. It combines the challenge of cutting-edge tech with real-world consequence."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "How would you explain Responsible Growth in your own words to an interviewer?",
+    a: "Growing the business sustainably — not just chasing profit, but doing it ethically, with strong risk management, putting clients first, investing in employees, and giving back to communities. It means growth that is good for everyone: clients, shareholders, employees, and society."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "What would you say makes you a good fit for this specific Application Support role?",
+    a: "Focus on: curiosity and willingness to learn processes, ability to stay organised (trackers, documentation, deadlines), clear communication with different teams, interest in understanding how systems work and why they fail, and alignment with BofA's values of integrity and responsible work."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "How would you describe what Application Support does to a non-technical person?",
+    a: "We make sure the bank's software keeps running smoothly. When something goes wrong — a system crashes or a process breaks — we're the team that responds, figures out what happened, fixes it, and makes sure it doesn't happen again. We also make sure all the rules and checks are being followed behind the scenes."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "What is a 'stakeholder' and why does communicating with them matter in this role?",
+    a: "A stakeholder is anyone with an interest in or affected by a system — traders, business users, compliance teams, developers, regulators. In Application Support, you must communicate clearly with all of them: technical engineers AND non-technical business users. Clear communication resolves issues faster and builds trust."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "Why does intellectual curiosity matter in a technology apprenticeship?",
+    a: "Technology changes constantly. Curiosity drives you to understand <em>why</em> things work, not just how to follow instructions. BofA specifically lists it as essential — they want people who proactively explore new solutions, ask questions, and keep learning beyond what's assigned to them."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "What is the difference between working in technology AT a bank vs working at a tech company?",
+    a: "At a bank, technology directly underpins financial markets, client money, and regulatory obligations — the stakes are extremely high. Systems must be highly stable, auditable, and compliant. At a pure tech company, there's often more tolerance for experimentation. Banking tech demands rigour, governance, and responsibility alongside innovation."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "What question might an interviewer ask about risk, and how should you approach it?",
+    a: "They might ask: 'Why is risk management important in your role?' Answer: Every employee at BofA owns risk. In App Support, if a system fails due to poor governance or an unapproved change, it can cause financial losses or compliance breaches. My job is to spot risks early, follow processes, and flag issues proactively — not wait for problems to escalate."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "What is a 'portfolio of applications' in App Support context?",
+    a: "The specific set of software systems your team is responsible for supporting. Each team has an assigned portfolio — e.g., trading systems, payment platforms, or risk tools. You monitor, govern, and support everything within your portfolio, understanding its health, risks, and compliance status."
+  },
+  {
+    cat: "prep",
+    catLabel: "Interview Prep",
+    q: "How does your role contribute to BofA's mission of making financial lives better?",
+    a: "By keeping systems stable and compliant, you ensure clients can access their money, traders can execute transactions, and businesses can manage their finances without disruption. Behind every smooth banking experience is a support team ensuring the technology works — your role is foundational to client trust."
+  }
+];
+
+var activeFilter = 'all';
+var searchQ = '';
+var flipped = {};
+var studyIdx = 0;
+var studyDeck = [];
+var visibleCards = [];
+
+function init() {
+  buildFilters();
+  render();
+}
+
+function buildFilters() {
+  var cats = {};
+  for (var i = 0; i < CARDS.length; i++) {
+    cats[CARDS[i].cat] = CARDS[i].catLabel;
+  }
+  var html = '';
+  html += '<button class="btn active" data-cat="all" onclick="setFilter(this,\'all\')">All (' + CARDS.length + ')</button> ';
+  for (var cat in cats) {
+    var count = CARDS.filter(function(c){return c.cat===cat;}).length;
+    html += '<button class="btn" data-cat="' + cat + '" onclick="setFilter(this,\'' + cat + '\')">' + cats[cat] + ' (' + count + ')</button> ';
+  }
+  document.getElementById('filters').innerHTML = html;
+}
+
+function setFilter(btn, cat) {
+  activeFilter = cat;
+  var btns = document.querySelectorAll('[data-cat]');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  render();
+}
+
+function getVisible() {
+  var q = searchQ.toLowerCase();
+  return CARDS.filter(function(c) {
+    var matchCat = activeFilter === 'all' || c.cat === activeFilter;
+    var matchSearch = !q || c.q.toLowerCase().indexOf(q) > -1 || c.a.toLowerCase().indexOf(q) > -1;
+    return matchCat && matchSearch;
+  });
+}
+
+function render() {
+  visibleCards = getVisible();
+  var grid = document.getElementById('grid');
+  if (visibleCards.length === 0) {
+    grid.innerHTML = '<div class="no-cards">No cards found.</div>';
+    updateStats();
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < visibleCards.length; i++) {
+    var c = visibleCards[i];
+    var isFlipped = flipped[c.q] ? ' flipped' : '';
+    html += '<div class="fc' + isFlipped + '" onclick="toggleCard(this,\'' + escKey(c.q) + '\')">' +
+      '<div class="fc-inner">' +
+        '<div class="fc-front">' +
+          '<span class="fc-cat c-' + c.cat + '">' + c.catLabel + '</span>' +
+          '<div class="fc-q">' + c.q + '</div>' +
+          '<div class="fc-hint">Tap to reveal answer</div>' +
+        '</div>' +
+        '<div class="fc-back">' +
+          '<div class="fc-cat-back">' + c.catLabel + '</div>' +
+          '<div class="fc-a">' + c.a + '</div>' +
+          '<div class="fc-flip-hint">Tap to flip back</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  grid.innerHTML = html;
+  updateStats();
+}
+
+function escKey(s) {
+  return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+function toggleCard(el, key) {
+  el.classList.toggle('flipped');
+  flipped[key] = el.classList.contains('flipped');
+  updateStats();
+}
+
+function updateStats() {
+  var reviewedCount = Object.keys(flipped).filter(function(k){return flipped[k];}).length;
+  var total = CARDS.length;
+  var vis = visibleCards.length;
+  var pct = vis > 0 ? Math.round(reviewedCount / total * 100) : 0;
+  document.getElementById('tc').textContent = total;
+  document.getElementById('vc').textContent = vis;
+  document.getElementById('rc').textContent = reviewedCount;
+  document.getElementById('pf').style.width = pct + '%';
+  document.getElementById('pt-l').textContent = reviewedCount + ' reviewed';
+  document.getElementById('pt-r').textContent = pct + '%';
+}
+
+function onSearch() {
+  searchQ = document.getElementById('search').value;
+  render();
+}
+
+function doShuffle() {
+  var grid = document.getElementById('grid');
+  var cards = Array.from(grid.children);
+  for (var i = cards.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    grid.appendChild(cards[j]);
+    cards.splice(j, 1);
+  }
+}
+
+function doReset() {
+  flipped = {};
+  render();
+}
+
+function openStudy() {
+  studyDeck = getVisible().slice();
+  studyIdx = 0;
+  showStudyCard();
+  document.getElementById('overlay').classList.add('show');
+}
+
+function showStudyCard() {
+  var c = studyDeck[studyIdx];
+  document.getElementById('sc-cat').textContent = c.catLabel;
+  document.getElementById('sc-q').textContent = c.q;
+  document.getElementById('sc-a').innerHTML = c.a;
+  document.getElementById('sc-counter').textContent = 'Card ' + (studyIdx + 1) + ' of ' + studyDeck.length;
+  document.getElementById('sc').classList.remove('flipped');
+}
+
+function flipStudy() {
+  var sc = document.getElementById('sc');
+  sc.classList.toggle('flipped');
+  if (sc.classList.contains('flipped')) {
+    flipped[studyDeck[studyIdx].q] = true;
+    updateStats();
+  }
+}
+
+function sNav(dir) {
+  studyIdx = (studyIdx + dir + studyDeck.length) % studyDeck.length;
+  showStudyCard();
+}
+
+function sShuf() {
+  for (var i = studyDeck.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = studyDeck[i]; studyDeck[i] = studyDeck[j]; studyDeck[j] = tmp;
+  }
+  studyIdx = 0;
+  showStudyCard();
+}
+
+function closeStudy() {
+  document.getElementById('overlay').classList.remove('show');
+  render();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('overlay').classList.contains('show')) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') sNav(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') sNav(-1);
+  if (e.key === ' ') { e.preventDefault(); flipStudy(); }
+  if (e.key === 'Escape') closeStudy();
+});
+
+window.onload = function() { init(); };
+</script>
+</body>
+</html>
